@@ -6,7 +6,7 @@ Want to know more about the data that GPSTest collects?  See some common questio
 
 The purpose of GPSTest is to give application developers and platform implementers an open-source reference application that demonstrates how GNSS works on Android devices.  Its goal is to advance the quality and smart use of GNSS technology in mobile devices and mobile apps.  It also allows curious users to better understand GPS on their Android device.
 
-More details are in the European Global Navigation Satellite System Agency (GSA)'s publication [Understanding GNSS performance on Android using the GPSTest App](https://www.gsa.europa.eu/sites/default/files/understanding_gnss_performance_on_android_using_the_gps_testc_app_0.pdf). 
+More details are in the European Global Navigation Satellite System Agency (GSA)'s publication [Test your satellite navigation performance on your Android device](https://www.gsa.europa.eu/sites/default/files/gps-test-app-definition.pdf). 
 
 ## What satellite constellations does GPSTest support?
 
@@ -45,6 +45,7 @@ Galileo support has also been confirmed using GPSTest on the following devices:
 * OnePlus 5 (Android 7.1.1 / OxygenOS 4.5.8) (See [this post](https://github.com/barbeau/gpstest/issues/58#issuecomment-322124679))
 * Huawei P10 (See [this post](https://groups.google.com/forum/#!topic/gpstest_android/Kc_YOQLp35I) - Android 7.0, firmware version L29C432B171)
 * OnePlus 5T (See [this post](https://groups.google.com/forum/m/#!topic/gpstest_android/MCowNjKpVyo)) 
+* Xiaomi Mi 9 (See [official specsheet](https://www.mi.com/global/mi9/specs/)) (also supports GLONASS, Beidou and dual-frequency receiving)
 
 Note that the U.S. [FCC currently restricts use of Galileo](https://groups.google.com/forum/#!topic/gpstest_android/KrBe_csYFfg) when in the United States, so even if your device supports Galileo you won't see any Galileo satellites in GPSTest when in the United States.
 
@@ -56,7 +57,19 @@ Here's a nice table (Source: [Rohde & Schwarz](https://www.rohde-schwarz-usa.com
 
 ![image](https://user-images.githubusercontent.com/928045/42654926-53581aa0-85e8-11e8-91ab-cd8ab6553bb7.png)
 
+Another reference chart is [here](https://www.novatel.com/assets/Documents/Downloads/NovAtelChartH.pdf) from NovAtel.
+
 For more information on dual-frequency GNSS in general, see the EU GSA article ["Dual-frequency Q&As"](https://www.gsa.europa.eu/system/files/documents/dual_frequencies_qa.pdf).
+
+## What does the "U" flag mean for SBAS satellites?
+
+For SBAS, the Android spec does not specify if the "U" ("Used") flag refers to pseudoranges from the satellite being used in the position solution or to correction information originating from that satellite being used.
+
+[Here's](https://developer.android.com/reference/android/location/GnssStatus.html#usedInFix(int)) the documentation for the boolean value for "used" that's passed from the chipset to the Android OS to GPSTest, which is shown as a "U" letter in the "Flags" column on the GPSTest Status screen:
+
+>Reports whether the satellite at the specified index was used in the calculation of the most recent position fix.
+
+As a result, it's unclear how this is being implemented by OEMs.
 
 ## What Android devices does GPSTest run on?
 

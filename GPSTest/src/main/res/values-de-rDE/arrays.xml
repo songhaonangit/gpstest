@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-    <!--
+<?xml version="1.0" encoding="utf-8"?><!--
 /* //device/apps/common/assets/res/any/strings.xml
 **
 ** Copyright 2012, Sean J. Barbeau
@@ -35,27 +34,6 @@
         <item>Hybridansicht</item>
         <item>Satellitenansicht</item>
         <item>Geländeansicht</item>
-    </string-array>
-
-    <!-- These contants above and below match those in GoogleMap object:
-        https://developers.google.com/maps/documentation/android/reference/com/google/android/gms/maps/GoogleMap -->
-    <string-array name="map_type_values">
-        <item>1</item>
-        <item>4</item>
-        <item>2</item>
-        <item>3</item>
-    </string-array>
-
-    <!-- Units -->
-    <string-array name="preferred_distance_units_options">
-        <item>@string/preferences_preferred_distance_units_option_meters</item>
-        <item>@string/preferences_preferred_distance_units_option_feet</item>
-    </string-array>
-
-    <string-array name="preferred_speed_units_options">
-        <item>@string/preferences_preferred_speed_units_option_meters_per_second</item>
-        <item>@string/preferences_preferred_speed_units_option_kilometers_per_hour</item>
-        <item>@string/preferences_preferred_speed_units_option_miles_per_hour</item>
     </string-array>
 
     <!-- Help -->

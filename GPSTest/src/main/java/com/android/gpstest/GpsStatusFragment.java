@@ -41,11 +41,21 @@ import android.widget.LinearLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.android.gpstest.model.ConstellationType;
+import com.android.gpstest.model.DilutionOfPrecision;
 import com.android.gpstest.model.GnssType;
 import com.android.gpstest.model.SatelliteStatus;
+import com.android.gpstest.util.CarrierFreqUtils;
 import com.android.gpstest.util.GpsTestUtil;
 import com.android.gpstest.util.MathUtils;
+import com.android.gpstest.util.NmeaUtils;
 import com.android.gpstest.util.PreferenceUtils;
 import com.android.gpstest.util.SortUtil;
 import com.android.gpstest.util.UIUtils;
@@ -54,13 +64,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.util.TypedValue.COMPLEX_UNIT_PX;
@@ -107,16 +110,15 @@ public class GpsStatusFragment extends Fragment implements GpsTestListener {
 
     private boolean mNavigating;
 
-    private Drawable mFlagUsa, mFlagRussia, mFlagJapan, mFlagChina, mFlagGalileo, mFlagIndia,
-            mFlagEU, mFlagICAO;
+    private Drawable mFlagUsa, mFlagRussia, mFlagJapan, mFlagChina, mFlagIndia, mFlagEU, mFlagICAO;
 
     private boolean mUseLegacyGnssApi = false;
 
     private String mTtff = "";
 
-    private static final String METERS = Application.get().getString(R.string.preferences_preferred_distance_units_option_meters);
-    private static final String METERS_PER_SECOND = Application.get().getString(R.string.preferences_preferred_speed_units_option_meters_per_second);
-    private static final String KILOMETERS_PER_HOUR = Application.get().getString(R.string.preferences_preferred_speed_units_option_kilometers_per_hour);
+    private static final String METERS = Application.get().getResources().getStringArray(R.array.preferred_distance_units_values)[0];
+    private static final String METERS_PER_SECOND = Application.get().getResources().getStringArray(R.array.preferred_speed_units_values)[0];
+    private static final String KILOMETERS_PER_HOUR = Application.get().getResources().getStringArray(R.array.preferred_speed_units_values)[1];
 
     String mPrefDistanceUnits;
     String mPrefSpeedUnits;
@@ -160,7 +162,6 @@ public class GpsStatusFragment extends Fragment implements GpsTestListener {
         mFlagRussia = getResources().getDrawable(R.drawable.ic_flag_russia);
         mFlagJapan = getResources().getDrawable(R.drawable.ic_flag_japan);
         mFlagChina = getResources().getDrawable(R.drawable.ic_flag_china);
-        mFlagGalileo = getResources().getDrawable(R.drawable.ic_flag_galileo);
         mFlagIndia = getResources().getDrawable(R.drawable.ic_flag_gagan);
         mFlagEU = getResources().getDrawable(R.drawable.ic_flag_european_union);
         mFlagICAO = getResources().getDrawable(R.drawable.ic_flag_icao);
@@ -238,21 +239,17 @@ public class GpsStatusFragment extends Fragment implements GpsTestListener {
      * @param location
      */
     private void updateLocationAccuracies(Location location) {
-        if (GpsTestUtil.isVerticalAccuracySupported()) {
+        if (GpsTestUtil.isVerticalAccuracySupported(location)) {
             mHorVertAccuracyLabelView.setText(R.string.gps_hor_and_vert_accuracy_label);
-            if (location.hasAccuracy() || location.hasVerticalAccuracy()) {
-                if (mPrefDistanceUnits.equalsIgnoreCase(METERS)) {
-                    mHorVertAccuracyView.setText(mRes.getString(R.string.gps_hor_and_vert_accuracy_value_meters,
-                            location.getAccuracy(),
-                            location.getVerticalAccuracyMeters()));
-                } else {
-                    // Feet
-                    mHorVertAccuracyView.setText(mRes.getString(R.string.gps_hor_and_vert_accuracy_value_feet,
-                            UIUtils.toFeet(location.getAccuracy()),
-                            UIUtils.toFeet(location.getVerticalAccuracyMeters())));
-                }
+            if (mPrefDistanceUnits.equalsIgnoreCase(METERS)) {
+                mHorVertAccuracyView.setText(mRes.getString(R.string.gps_hor_and_vert_accuracy_value_meters,
+                        location.getAccuracy(),
+                        location.getVerticalAccuracyMeters()));
             } else {
-                mHorVertAccuracyView.setText("");
+                // Feet
+                mHorVertAccuracyView.setText(mRes.getString(R.string.gps_hor_and_vert_accuracy_value_feet,
+                        UIUtils.toFeet(location.getAccuracy()),
+                        UIUtils.toFeet(location.getVerticalAccuracyMeters())));
             }
         } else {
             if (location.hasAccuracy()) {
@@ -465,8 +462,8 @@ public class GpsStatusFragment extends Fragment implements GpsTestListener {
             // Do nothing if the Fragment isn't added
             return;
         }
-        if (message.startsWith("$GPGGA") || message.startsWith("$GNGNS")) {
-            Double altitudeMsl = GpsTestUtil.getAltitudeMeanSeaLevel(message);
+        if (message.startsWith("$GPGGA") || message.startsWith("$GNGNS") || message.startsWith("$GNGGA")) {
+            Double altitudeMsl = NmeaUtils.getAltitudeMeanSeaLevel(message);
             if (altitudeMsl != null && mNavigating) {
                 if (mPrefDistanceUnits.equalsIgnoreCase(METERS)) {
                     mAltitudeMslView.setText(mRes.getString(R.string.gps_altitude_msl_value_meters, altitudeMsl));
@@ -476,7 +473,7 @@ public class GpsStatusFragment extends Fragment implements GpsTestListener {
             }
         }
         if (message.startsWith("$GNGSA") || message.startsWith("$GPGSA")) {
-            DilutionOfPrecision dop = GpsTestUtil.getDop(message);
+            DilutionOfPrecision dop = NmeaUtils.getDop(message);
             if (dop != null && mNavigating) {
                 showDopViews();
                 mPdopView.setText(mRes.getString(R.string.pdop_value, dop.getPositionDop()));
@@ -648,9 +645,9 @@ public class GpsStatusFragment extends Fragment implements GpsTestListener {
         Application app = Application.get();
 
         mPrefDistanceUnits = settings
-                .getString(app.getString(R.string.pref_key_preferred_distance_units), METERS);
+                .getString(app.getString(R.string.pref_key_preferred_distance_units_v2), METERS);
         mPrefSpeedUnits = settings
-                .getString(app.getString(R.string.pref_key_preferred_speed_units), METERS_PER_SECOND);
+                .getString(app.getString(R.string.pref_key_preferred_speed_units_v2), METERS_PER_SECOND);
     }
 
     /**
@@ -857,7 +854,7 @@ public class GpsStatusFragment extends Fragment implements GpsTestListener {
                         break;
                     case GALILEO:
                         v.getFlag().setVisibility(View.VISIBLE);
-                        v.getFlag().setImageDrawable(mFlagGalileo);
+                        v.getFlag().setImageDrawable(mFlagEU);
                         break;
                     case SBAS:
                         setSbasFlag(sats.get(dataRow), v.getFlag());
@@ -870,7 +867,7 @@ public class GpsStatusFragment extends Fragment implements GpsTestListener {
                     if (sats.get(dataRow).getCarrierFrequencyHz() != NO_DATA) {
                         // Convert Hz to MHz
                         float carrierMhz = MathUtils.toMhz(sats.get(dataRow).getCarrierFrequencyHz());
-                        String carrierLabel = GpsTestUtil.getCarrierFrequencyLabel(sats.get(dataRow).getGnssType(),
+                        String carrierLabel = CarrierFreqUtils.getCarrierFrequencyLabel(sats.get(dataRow).getGnssType(),
                                 sats.get(dataRow).getSvid(),
                                 carrierMhz);
                         if (carrierLabel != null) {

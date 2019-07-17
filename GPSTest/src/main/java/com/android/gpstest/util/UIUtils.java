@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -35,8 +36,13 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.concurrent.TimeUnit;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
+import static android.content.pm.PackageManager.GET_META_DATA;
+import static android.text.TextUtils.isEmpty;
 import static com.android.gpstest.view.GpsSkyView.MAX_VALUE_CN0;
 import static com.android.gpstest.view.GpsSkyView.MAX_VALUE_SNR;
 import static com.android.gpstest.view.GpsSkyView.MIN_VALUE_CN0;
@@ -329,5 +335,78 @@ public class UIUtils {
      */
     public static float toMilesPerHour(float metersPerSecond) {
         return toKilometersPerHour(metersPerSecond) / 1.6093440f;
+    }
+
+    /**
+     * Sets the vertical bias for a provided view that is within a ConstraintLayout
+     * @param view view within a ConstraintLayout
+     * @param bias vertical bias to be used
+     */
+    public static void setVerticalBias(View view, float bias) {
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) view.getLayoutParams();
+        params.verticalBias = bias;
+        view.setLayoutParams(params);
+    }
+
+    /**
+     * Tests to see if the provided text latitude, longitude, and altitude values are valid, and if
+     * not shows an error dialog and returns false, or if yes then returns true
+     * @param activity
+     * @param lat latitude to validate
+     * @param lon longitude to validate
+     * @param alt altitude to validate
+     * @return true if the latitude, longitude, and latitude are valid, false if any of them are not
+     */
+    public static boolean isValidLocationWithErrorDialog(AppCompatActivity activity, String lat, String lon, String alt) {
+        String dialogTitle = Application.get().getString(R.string.ground_truth_invalid_location_title);
+        String dialogMessage;
+
+        if (!LocationUtils.isValidLatitude(lat)) {
+            dialogMessage = Application.get().getString(R.string.ground_truth_invalid_lat);
+            UIUtils.showLocationErrorDialog(activity, dialogTitle, dialogMessage);
+            return false;
+        }
+        if (!LocationUtils.isValidLongitude(lon)) {
+            dialogMessage = Application.get().getString(R.string.ground_truth_invalid_long);
+            UIUtils.showLocationErrorDialog(activity, dialogTitle, dialogMessage);
+            return false;
+        }
+        if (!isEmpty(alt) && !LocationUtils.isValidAltitude(alt)) {
+            dialogMessage = Application.get().getString(R.string.ground_truth_invalid_alt);
+            UIUtils.showLocationErrorDialog(activity, dialogTitle, dialogMessage);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Shows an error dialog for an incorrectly entered latitude, longitude, or altitude
+     * @param activity
+     * @param title title of the error dialog
+     * @param message message body of the error dialog
+     */
+    private static void showLocationErrorDialog(AppCompatActivity activity, String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(R.string.ok, (dialog, id) -> { })
+                .create()
+                .show();
+    }
+
+    /**
+     * Resets the activity title so the locale is updated
+     *
+     * @param a the activity to reset the title for
+     */
+    public static void resetActivityTitle(Activity a) {
+        try {
+            ActivityInfo info = a.getPackageManager().getActivityInfo(a.getComponentName(), GET_META_DATA);
+            if (info.labelRes != 0) {
+                a.setTitle(info.labelRes);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }

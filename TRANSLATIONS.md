@@ -6,25 +6,25 @@ Users have contributed translations in the following languages:
 * German
 * Greek
 * Japanese
+* Czech
+* Italian
+* Russian
+* Spanish
 
 We would love help improving the existing translations, or adding a new translation.
 
-## English text
+## Transifex
 
-You can see the most recent English text in these files:
+We use Transifex, which is free for open-source projects:
+* [GPSTest Dashboard](https://www.transifex.com/sean-barbeau/gpstest-android/dashboard/)
 
-* [`GPSTest/src/main/res/values/strings.xml`](/GPSTest/src/main/res/values/strings.xml)
-* [`GPSTest/src/main/res/values/arrays.xml`](/GPSTest/src/main/res/values/arrays.xml)
+[Here](https://docs.transifex.com/getting-started-1/translators) are some instructions for getting started with Transifex.  Please note that if you contribute a translation, you will be expected to keep it up-to-date as the app changes.
 
-Note that these files are in the master branch and may be ahead of the text you see in the released version of the app as new features are added but not yet released.
+As mentioned [here](https://docs.transifex.com/faq/all#what-kind-of-notifications-can-i-get-for-the-projects-i-translate), you can register to receive notifications when strings change and are ready for translation:
 
-## Contributing translations
+>To watch a project, select it from your dashboard and click the Watch icon in the header, above the Translate or Live button.
 
-The process for contributing translations is as follows:
-1. Create new `strings.xml` and `arrays.xml` files for your language with the English strings replaced with the translated strings for your language
-1. Open an issue with the new files attached, OR if you have a GitHub account create a new directory `values-x` (where `x` is the two letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) language code), put the new files in this directory and open a pull request on GitHub.
-
-Please note that if you contribute a translation, you will be expected to keep it up-to-date as the app changes.  The developer will notify you via GitHub or email when new strings in the English files are available for translation, and then you can follow the above process for contributing improvements (but by editing existing translation files instead of creating new files).
+See also the [Notifications documentation](https://docs.transifex.com/tracking/notifications).
 
 ## Example translation
 

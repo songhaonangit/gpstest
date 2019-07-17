@@ -10,8 +10,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 27
-        versionCode 44
-        versionName "3.2.9"
+        versionCode 50
+        versionName "3.3.4"
 
         vectorDrawables.useSupportLibrary = true
 
@@ -58,8 +58,8 @@ android {
             release {
                 storeFile file(props['key.store'])
                 keyAlias props['key.alias']
-                storePassword "askmelater"
-                keyPassword "askmelater"
+                storePassword props['key.storepassword']
+                keyPassword props['key.keypassword']
             }
         }
     } else {
@@ -102,66 +102,32 @@ android {
     }
 }
 
-/**
- * Ask for keystore/key passwords on the command line or popup UI when running release builds
- */
-//task askForPasswords << {
-//    def console = System.console()
-//    def storePw
-//    def keyPw
-
-//    if (console) {
-//        // Must create String because System.readPassword() returns char[]
-//        // (and assigning that below fails silently)
-//        storePw = new String(console.readPassword("\nKeystore password: "))
-//        keyPw = new String(console.readPassword("Key password: "))
-//    } else {
-//        // Gradle is running as a daemon - prompt user to enter passwords via popup UI (#87)
-//        new SwingBuilder().edt {
-//            dialog(modal: true, title: 'Enter credentials', alwaysOnTop: true, resizable: true,
-//                    locationRelativeTo: null, pack: true, show: true
-//            ) {
-//                vbox {
-//                    label(text: "Keystore passphrase:")
-//                    textField id: "storeText", input = passwordField()
-//                    label(text: "Key passphrase:")
-//                    textField id: "keyText", input = passwordField()
-//                    button(defaultButton: true, text: 'OK', actionPerformed: {
-//                        storePw = storeText.text;
-//                        keyPw = keyText.text;
-//                        dispose();
-//                    })
-//                }
-//            }
-//        }
-//    }
-
-//    android.signingConfigs.release.storePassword = storePw
-//    android.signingConfigs.release.keyPassword = keyPw
-//}
-
-tasks.whenTaskAdded { theTask ->
-    if (theTask.name.matches("\\bpackage\\w+Release\\b")) {
-        theTask.dependsOn "askForPasswords"
-    }
-}
-
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta1'
+    // ViewModel and LiveData
+    implementation "androidx.lifecycle:lifecycle-extensions:2.1.0-beta01"
+
+    // Sliding drawer in map view
+    implementation 'com.sothree.slidinguppanel:library:3.4.0'
+
+    // Graphs for sliding drawer
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0-alpha'
+
     implementation files('libs/AMap3DMap_5.6.0_AMapSearch_5.5.0_AMapLocation_3.7.0_20171218.jar')
     // Map (Google flavor only)
-    googleImplementation 'com.google.android.gms:play-services-maps:15.0.1'
+    googleImplementation 'com.google.android.gms:play-services-maps:16.1.0'
     // Calculating offset for camera target in map view (Google flavor only)
     googleImplementation 'com.google.maps.android:android-maps-utils:0.5'
     // OSM Droid (fdroid flavor only)
-    osmdroidImplementation 'org.osmdroid:osmdroid-android:6.0.2'
+    osmdroidImplementation 'org.osmdroid:osmdroid-android:6.1.0'
 
     // Unit tests
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

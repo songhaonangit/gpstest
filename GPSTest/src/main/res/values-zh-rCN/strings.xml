@@ -21,9 +21,10 @@
     <string name="app_name">GPSTest</string>
 
     <!-- Fragments -->
-    <string name="gps_status_title">状态</string>
-    <string name="gps_map_title">地图</string>
-    <string name="gps_sky_title">天空</string>
+    <string name="gps_status_title">状态视图</string>
+    <string name="gps_map_title">地图视图</string>
+    <string name="gps_sky_title">天空视图</string>
+    <string name="gps_accuracy_title">精度视图</string>
 
     <!-- Navigation Drawer -->
     <string name="navdrawer_separator_assist_data">修改辅助数据</string>
