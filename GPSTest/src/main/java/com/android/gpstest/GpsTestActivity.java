@@ -688,7 +688,7 @@ public class GpsTestActivity extends AppCompatActivity
          * Hide everything that shouldn't be shown
          */
         hideStatusFragment();
-        hideMapFragment();
+        hideaMapFragment();
         hideAccuracyFragment();
         if (mBenchmarkController != null) {
             mBenchmarkController.hide();
